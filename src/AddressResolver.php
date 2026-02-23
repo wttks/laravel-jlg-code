@@ -53,7 +53,7 @@ final class AddressResolver
         }
 
         $prefecture = $parsed['prefecture'];
-        $prefCode = $prefecture->value;
+        $prefCode = $prefecture->code();
         $municipalityName = $parsed['municipality'];
 
         $code = self::findCode($prefCode, $municipalityName);

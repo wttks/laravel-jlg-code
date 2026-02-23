@@ -35,7 +35,7 @@ trait BelongsToMunicipality
     public function scopeWherePrefectureCode(Builder $query, Prefecture $prefecture): Builder
     {
         return $query->whereHas('municipality', function (Builder $q) use ($prefecture) {
-            $q->where('prefecture_code', $prefecture->value);
+            $q->where('prefecture_code', $prefecture->code());
         });
     }
 
