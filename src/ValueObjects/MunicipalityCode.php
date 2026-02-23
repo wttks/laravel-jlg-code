@@ -29,7 +29,7 @@ final readonly class MunicipalityCode implements Stringable
             throw new InvalidArgumentException("団体コードのチェックディジットが不正です: {$value}");
         }
 
-        $prefCode = substr($normalized, 0, 2);
+        $prefCode = (int) substr($normalized, 0, 2);
         if (Prefecture::tryFrom($prefCode) === null) {
             throw new InvalidArgumentException("都道府県コードが不正です: {$prefCode}");
         }
@@ -63,7 +63,10 @@ final readonly class MunicipalityCode implements Stringable
     }
 
     /**
-     * 都道府県コード部分（上2桁）
+     * 都道府県コード部分（上2桁、ゼロパディング文字列）
+     *
+     * JLGコードの一部として文字列のまま返す。
+     * Prefecture Enum が必要な場合は prefecture() を使うこと。
      */
     public function prefectureCode(): string
     {
@@ -75,7 +78,7 @@ final readonly class MunicipalityCode implements Stringable
      */
     public function prefecture(): Prefecture
     {
-        return Prefecture::from($this->prefectureCode());
+        return Prefecture::from((int) $this->prefectureCode());
     }
 
     /**

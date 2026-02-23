@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Wttks\JlgCode\Casts\MunicipalityCodeCast;
+use Wttks\JlgCode\Casts\PrefectureCast;
 use Wttks\JlgCode\Enums\Prefecture;
 
 class Municipality extends Model
@@ -44,7 +45,7 @@ class Municipality extends Model
     {
         return [
             'code' => MunicipalityCodeCast::class,
-            'prefecture_code' => Prefecture::class,
+            'prefecture_code' => PrefectureCast::class,
             'deprecated_at' => 'datetime',
         ];
     }
@@ -94,7 +95,7 @@ class Municipality extends Model
      */
     public function scopeWherePrefecture(Builder $query, Prefecture $prefecture): Builder
     {
-        return $query->where('prefecture_code', $prefecture->value);
+        return $query->where('prefecture_code', $prefecture->code());
     }
 
     /**

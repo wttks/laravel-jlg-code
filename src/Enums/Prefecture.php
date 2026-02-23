@@ -9,55 +9,66 @@ namespace Wttks\JlgCode\Enums;
  *
  * backed value = 都道府県コード（2桁: 01〜47）
  */
-enum Prefecture: string
+enum Prefecture: int
 {
-    case Hokkaido = '01';
-    case Aomori = '02';
-    case Iwate = '03';
-    case Miyagi = '04';
-    case Akita = '05';
-    case Yamagata = '06';
-    case Fukushima = '07';
-    case Ibaraki = '08';
-    case Tochigi = '09';
-    case Gunma = '10';
-    case Saitama = '11';
-    case Chiba = '12';
-    case Tokyo = '13';
-    case Kanagawa = '14';
-    case Niigata = '15';
-    case Toyama = '16';
-    case Ishikawa = '17';
-    case Fukui = '18';
-    case Yamanashi = '19';
-    case Nagano = '20';
-    case Gifu = '21';
-    case Shizuoka = '22';
-    case Aichi = '23';
-    case Mie = '24';
-    case Shiga = '25';
-    case Kyoto = '26';
-    case Osaka = '27';
-    case Hyogo = '28';
-    case Nara = '29';
-    case Wakayama = '30';
-    case Tottori = '31';
-    case Shimane = '32';
-    case Okayama = '33';
-    case Hiroshima = '34';
-    case Yamaguchi = '35';
-    case Tokushima = '36';
-    case Kagawa = '37';
-    case Ehime = '38';
-    case Kochi = '39';
-    case Fukuoka = '40';
-    case Saga = '41';
-    case Nagasaki = '42';
-    case Kumamoto = '43';
-    case Oita = '44';
-    case Miyazaki = '45';
-    case Kagoshima = '46';
-    case Okinawa = '47';
+    case Hokkaido = 1;
+    case Aomori = 2;
+    case Iwate = 3;
+    case Miyagi = 4;
+    case Akita = 5;
+    case Yamagata = 6;
+    case Fukushima = 7;
+    case Ibaraki = 8;
+    case Tochigi = 9;
+    case Gunma = 10;
+    case Saitama = 11;
+    case Chiba = 12;
+    case Tokyo = 13;
+    case Kanagawa = 14;
+    case Niigata = 15;
+    case Toyama = 16;
+    case Ishikawa = 17;
+    case Fukui = 18;
+    case Yamanashi = 19;
+    case Nagano = 20;
+    case Gifu = 21;
+    case Shizuoka = 22;
+    case Aichi = 23;
+    case Mie = 24;
+    case Shiga = 25;
+    case Kyoto = 26;
+    case Osaka = 27;
+    case Hyogo = 28;
+    case Nara = 29;
+    case Wakayama = 30;
+    case Tottori = 31;
+    case Shimane = 32;
+    case Okayama = 33;
+    case Hiroshima = 34;
+    case Yamaguchi = 35;
+    case Tokushima = 36;
+    case Kagawa = 37;
+    case Ehime = 38;
+    case Kochi = 39;
+    case Fukuoka = 40;
+    case Saga = 41;
+    case Nagasaki = 42;
+    case Kumamoto = 43;
+    case Oita = 44;
+    case Miyazaki = 45;
+    case Kagoshima = 46;
+    case Okinawa = 47;
+
+    /**
+     * JLGコード用の2桁ゼロパディング文字列（'01'〜'47'）
+     *
+     * 市区町村コード（6桁）の先頭2桁として使用する。
+     * DB には int で保存し、JLGコード生成時にこのメソッドで変換する。
+     */
+    public function code(): string
+    {
+        return sprintf('%02d', $this->value);
+    }
 
     /**
      * 都道府県名（漢字）
