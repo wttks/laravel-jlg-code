@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wttks\JlgCode;
 
 use Illuminate\Support\ServiceProvider;
+use Wttks\JlgCode\Console\Commands\BuildDistrictsCommand;
 use Wttks\JlgCode\Console\Commands\ImportMunicipalitiesCommand;
 use Wttks\JlgCode\Console\Commands\UpdateMunicipalitiesCommand;
 
@@ -24,6 +25,7 @@ class JlgCodeServiceProvider extends ServiceProvider
             $this->commands([
                 ImportMunicipalitiesCommand::class,
                 UpdateMunicipalitiesCommand::class,
+                BuildDistrictsCommand::class,
             ]);
         }
     }
