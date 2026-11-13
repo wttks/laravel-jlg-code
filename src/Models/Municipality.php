@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Wttks\JlgCode\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Wttks\JlgCode\Casts\MunicipalityCodeCast;
 use Wttks\JlgCode\Casts\PrefectureCast;
@@ -20,7 +23,7 @@ class Municipality extends Model
      * アプリ側に MunicipalityFactory があれば委譲する
      * （テストでの Municipality::factory() 呼び出し対応）
      */
-    protected static function newFactory(): ?\Illuminate\Database\Eloquent\Factories\Factory
+    protected static function newFactory(): ?Factory
     {
         $appFactory = 'Database\\Factories\\MunicipalityFactory';
         if (class_exists($appFactory)) {
@@ -35,6 +38,9 @@ class Municipality extends Model
         'prefecture_code',
         'name',
         'name_kana',
+        'district_name',
+        'parent_code',
+        'address_name',
         'deprecated_at',
     ];
 
@@ -64,6 +70,26 @@ class Municipality extends Model
     public function fullName(): string
     {
         return $this->prefecture_code->label().$this->name;
+    }
+
+    /**
+     * 政令指定都市の区 → 親の市
+     *
+     * @return BelongsTo<self, $this>
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_code', 'code');
+    }
+
+    /**
+     * 政令指定都市 → 区の一覧
+     *
+     * @return HasMany<self, $this>
+     */
+    public function wards(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_code', 'code');
     }
 
     /**
