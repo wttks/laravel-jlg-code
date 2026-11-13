@@ -12,7 +12,8 @@ class ImportMunicipalitiesCommand extends Command
 {
     protected $signature = 'jlg:import
                             {--path=     : CSVファイルのパス（省略時はデフォルトパス）}
-                            {--deprecate : CSV に存在しないコードを廃止扱いにする（全件CSVを使う場合のみ推奨）}';
+                            {--deprecate : CSV に存在しないコードを廃止扱いにする（全件CSVを使う場合のみ推奨）}
+                            {--districts-path= : 郡名等のCSVのパス（省略時はデフォルトパス）}';
 
     protected $description = '全国地方公共団体コード（市区町村）データをCSVからインポート';
 
@@ -26,6 +27,11 @@ class ImportMunicipalitiesCommand extends Command
         try {
             $count = $importer->import($path, markDeprecated: (bool) $this->option('deprecate'));
             $this->info("完了: {$count} 件のデータをインポートしました");
+
+            $districtsPath = $this->option('districts-path') ?? MunicipalityImporter::defaultDistrictCsvPath();
+            $this->line("  郡名等のCSVパス: {$districtsPath}");
+            $updated = $importer->importDistricts($districtsPath);
+            $this->info("完了: 郡名等を {$updated} 件に反映しました");
 
             return self::SUCCESS;
         } catch (RuntimeException $e) {

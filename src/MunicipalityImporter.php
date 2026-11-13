@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wttks\JlgCode;
 
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Wttks\JlgCode\Models\Municipality;
 
@@ -25,12 +26,12 @@ class MunicipalityImporter
         }
 
         $handle = fopen($csvPath, 'r');
-        fgetcsv($handle); // ヘッダー行をスキップ
+        fgetcsv($handle, escape: ''); // ヘッダー行をスキップ
 
         $records = [];
         $now = now();
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, escape: '')) !== false) {
             if (count($row) < 4) {
                 continue;
             }
@@ -67,6 +68,61 @@ class MunicipalityImporter
         }
 
         return count($records);
+    }
+
+    /**
+     * 郡名・政令市の親コード・住所での表記の CSV を取り込む（jlg:build-districts で作るもの）
+     *
+     * 市区町村本体（import()）の後に呼ぶこと。CSV に無いコード・DB に無いコードは触らない。
+     *
+     * @return int 更新件数
+     *
+     * @throws RuntimeException ファイルが見つからない場合
+     */
+    public function importDistricts(string $csvPath): int
+    {
+        if (! file_exists($csvPath)) {
+            throw new RuntimeException("CSVファイルが見つかりません: {$csvPath}");
+        }
+
+        $handle = fopen($csvPath, 'r');
+        fgetcsv($handle, escape: ''); // ヘッダー行をスキップ
+
+        $updated = 0;
+        DB::transaction(function () use ($handle, &$updated) {
+            while (($row = fgetcsv($handle, escape: '')) !== false) {
+                if (count($row) < 4) {
+                    continue;
+                }
+
+                $updated += Municipality::query()
+                    ->where('code', $row[0])
+                    ->update([
+                        'district_name' => $row[1] === '' ? null : $row[1],
+                        'parent_code' => $row[2] === '' ? null : $row[2],
+                        'address_name' => $row[3] === '' ? null : $row[3],
+                    ]);
+            }
+        });
+
+        fclose($handle);
+
+        return $updated;
+    }
+
+    /**
+     * 郡名等の CSV のデフォルトパス（storage/app/data にあれば優先・無ければ同梱）
+     */
+    public static function defaultDistrictCsvPath(): string
+    {
+        if (function_exists('storage_path')) {
+            $appPath = storage_path('app/data/municipality_districts.csv');
+            if (file_exists($appPath)) {
+                return $appPath;
+            }
+        }
+
+        return __DIR__.'/../resources/data/municipality_districts.csv';
     }
 
     /**

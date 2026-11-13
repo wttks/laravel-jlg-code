@@ -6,6 +6,7 @@ namespace Wttks\JlgCode\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Wttks\JlgCode\Models\Municipality;
+use Wttks\JlgCode\MunicipalityImporter;
 
 class MunicipalitySeeder extends Seeder
 {
@@ -26,12 +27,12 @@ class MunicipalitySeeder extends Seeder
         }
 
         $handle = fopen($csvPath, 'r');
-        fgetcsv($handle); // ヘッダー行をスキップ
+        fgetcsv($handle, escape: ''); // ヘッダー行をスキップ
 
         $records = [];
         $now = now();
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, escape: '')) !== false) {
             $records[] = [
                 'code' => $row[0],
                 'prefecture_code' => $row[1],
@@ -50,6 +51,10 @@ class MunicipalitySeeder extends Seeder
         }
 
         $this->command->info('市区町村データを '.count($records).' 件投入しました');
+
+        // 郡名・政令市の親コード・住所での表記
+        $updated = (new MunicipalityImporter)->importDistricts(MunicipalityImporter::defaultDistrictCsvPath());
+        $this->command->info('郡名等を '.$updated.' 件に反映しました');
     }
 
     /**

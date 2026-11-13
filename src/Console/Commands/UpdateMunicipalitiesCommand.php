@@ -84,9 +84,9 @@ class UpdateMunicipalitiesCommand extends Command
 
         // CSV書き出し
         $handle = fopen($outputPath, 'w');
-        fputcsv($handle, ['code', 'prefecture_code', 'name', 'name_kana']);
+        fputcsv($handle, ['code', 'prefecture_code', 'name', 'name_kana'], escape: '');
         foreach ($rows as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, $row, escape: '');
         }
         fclose($handle);
 
@@ -100,6 +100,10 @@ class UpdateMunicipalitiesCommand extends Command
             try {
                 $imported = $importer->import($outputPath, markDeprecated: true);
                 $this->info("インポート完了: {$imported} 件");
+
+                // 郡名等は KEN_ALL 由来の CSV（jlg:build-districts）から。新設コードは CSV を作り直すまで空のまま
+                $updated = $importer->importDistricts(MunicipalityImporter::defaultDistrictCsvPath());
+                $this->info("郡名等の反映: {$updated} 件");
             } catch (RuntimeException $e) {
                 $this->error($e->getMessage());
 

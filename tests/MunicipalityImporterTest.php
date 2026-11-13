@@ -255,9 +255,9 @@ class MunicipalityImporterTest extends TestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'jlg_test_');
         $handle = fopen($path, 'w');
-        fputcsv($handle, ['code', 'prefecture_code', 'name', 'name_kana']);
+        fputcsv($handle, ['code', 'prefecture_code', 'name', 'name_kana'], escape: '');
         foreach ($rows as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, $row, escape: '');
         }
         fclose($handle);
 
