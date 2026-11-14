@@ -64,8 +64,10 @@ class MunicipalityImporter
             Municipality::query()
                 ->whereNotIn('code', $activeCodes)
                 ->whereNull('deprecated_at') // まだ廃止マークされていないものだけ
-                ->update(['deprecated_at' => $now]);
+                ->update(['deprecated_at' => $now, 'updated_at' => $now]);
         }
+
+        AddressResolver::flushIndex();
 
         return count($records);
     }
@@ -101,11 +103,13 @@ class MunicipalityImporter
                         'district_name' => $row[1] === '' ? null : $row[1],
                         'parent_code' => $row[2] === '' ? null : $row[2],
                         'address_name' => $row[3] === '' ? null : $row[3],
+                        'updated_at' => now(),
                     ]);
             }
         });
 
         fclose($handle);
+        AddressResolver::flushIndex();
 
         return $updated;
     }

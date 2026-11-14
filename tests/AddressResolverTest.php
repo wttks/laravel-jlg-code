@@ -88,11 +88,18 @@ class AddressResolverTest extends TestCase
     }
 
     #[Test]
-    public function 都道府県なしの住所はnullを返す(): void
+    public function 都道府県なしの住所でも全国で1つなら解決する(): void
     {
+        // v1.3.0 から：県名なしは全国の索引から引く（候補が1つなら採用）
         $code = AddressResolver::resolveCode('新宿区西新宿');
 
-        $this->assertNull($code);
+        $this->assertSame('131041', $code);
+    }
+
+    #[Test]
+    public function 都道府県なしで当てはまらない住所はnullを返す(): void
+    {
+        $this->assertNull(AddressResolver::resolveCode('存在しない区西新宿'));
     }
 
     // =========================================================================
@@ -108,11 +115,17 @@ class AddressResolverTest extends TestCase
     }
 
     #[Test]
-    public function 都道府県なしの住所はnullを返す_resolvePrefecture(): void
+    public function 都道府県なしの住所でも市区町村から県を返す_県だけ取る(): void
     {
         $prefecture = AddressResolver::resolvePrefecture('新宿区西新宿');
 
-        $this->assertNull($prefecture);
+        $this->assertSame(Prefecture::Tokyo, $prefecture);
+    }
+
+    #[Test]
+    public function 都道府県なしで当てはまらない住所はnullを返す_県だけ取る(): void
+    {
+        $this->assertNull(AddressResolver::resolvePrefecture('存在しない区西新宿'));
     }
 
     // =========================================================================
