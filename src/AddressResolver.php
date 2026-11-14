@@ -156,13 +156,16 @@ final class AddressResolver
     }
 
     /**
-     * 照合用に住所を整える（空白を除き、ヶ をケにそろえる）
+     * 照合用に住所を整える（空白を除き、先頭の郵便番号を外し、ヶ をケにそろえる）
      *
      * ヶ→ケ は1文字→1文字なので、残りの位置はずれない
      */
     private static function normalize(string $text): string
     {
         $text = preg_replace('/[\s　]+/u', '', $text) ?? $text;
+
+        // 先頭の郵便番号（〒・区切りは任意・全角可）。7桁の後にさらに数字が続くものは郵便番号とみなさない
+        $text = preg_replace('/^〒?[0-9０-９]{3}[-－ー‐−]?[0-9０-９]{4}(?![0-9０-９])/u', '', $text) ?? $text;
 
         return str_replace('ヶ', 'ケ', $text);
     }

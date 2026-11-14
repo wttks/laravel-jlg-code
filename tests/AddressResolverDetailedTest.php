@@ -69,6 +69,61 @@ class AddressResolverDetailedTest extends TestCase
         $this->assertSame([], $result->candidates);
     }
 
+    /**
+     * 先頭に郵便番号が付いた住所（受注データで実際に多い形）
+     *
+     * @return array<string, array{string}>
+     */
+    public static function postalCodePrefixedProvider(): array
+    {
+        return [
+            '〒＋ハイフン＋空白' => ['〒811-4304 福岡県遠賀郡芦屋町幸町1-1'],
+            '〒も空白もなし' => ['811-4304福岡県遠賀郡芦屋町幸町1-1'],
+            '区切りなし7桁' => ['8114304 福岡県遠賀郡芦屋町幸町1-1'],
+            '全角の数字と区切り' => ['〒８１１－４３０４　福岡県遠賀郡芦屋町幸町1-1'],
+            '区切りが長音・県名なし' => ['811ー4304 遠賀郡芦屋町幸町1-1'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('postalCodePrefixedProvider')]
+    public function 先頭の郵便番号を外して解決する(string $address): void
+    {
+        $result = AddressResolver::resolveDetailed($address);
+
+        $this->assertSame(AddressResolveStatus::Resolved, $result->status);
+        $this->assertSame('403814', $result->code);
+        $this->assertSame(Prefecture::Fukuoka, $result->prefecture);
+        $this->assertSame('幸町1-1', $result->rest);
+    }
+
+    /**
+     * 郵便番号の桁数でない数字列は外さない（下限の1つ外・上限の1つ外）
+     *
+     * @return array<string, array{string}>
+     */
+    public static function notPostalCodeProvider(): array
+    {
+        return [
+            '6桁（1桁足りない）' => ['811-430 福岡県遠賀郡芦屋町幸町1-1'],
+            '8桁（1桁多い）' => ['811-43041福岡県遠賀郡芦屋町幸町1-1'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('notPostalCodeProvider')]
+    public function 郵便番号の形でない数字列は外さない(string $address): void
+    {
+        $this->assertSame(AddressResolveStatus::Unresolved, AddressResolver::resolveDetailed($address)->status);
+    }
+
+    #[Test]
+    public function 郵便番号付きでも_resolveCode_でコードが返る(): void
+    {
+        $this->assertSame('403814', AddressResolver::resolveCode('〒811-4304 福岡県遠賀郡芦屋町幸町1-1'));
+        $this->assertSame(Prefecture::Fukuoka, AddressResolver::resolvePrefecture('〒811-4304 福岡県遠賀郡芦屋町'));
+    }
+
     #[Test]
     public function 市区町村として読んだ部分と残りを返す(): void
     {
